@@ -406,13 +406,10 @@ Solutions:
 
 # Output
 
-## Training
+## Training and Prediction
 
-![Training](screenshots/output1.png)
 
-## Prediction
-
-![Prediction](screenshots/output2.png)
+![alt text](nnnFigure_1.png)
 
 ---
 
