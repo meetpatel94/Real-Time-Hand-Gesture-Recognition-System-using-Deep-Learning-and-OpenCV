@@ -337,6 +337,7 @@ translator = Translator()
 
 print("Model Loaded Successfully")
 
+
 # =========================
 # LABELS
 # =========================
@@ -350,23 +351,24 @@ labels = {
 24:'V',25:'W',26:'X',27:'Y',28:'Z'
 }
 
+
 # =========================
 # SETTINGS
 # =========================
 
-ROI_top = 120
-ROI_bottom = 340
-ROI_right = 150
-ROI_left = 370
+ROI_top=120
+ROI_bottom=340
+ROI_right=150
+ROI_left=370
 
-sentence = ""
-hindi_text = ""
+sentence=""
+hindi_text=""
 
-# Initial values
-current_prediction = "0"
-confidence = 0.0
+current_prediction="0"
+confidence=0.0
 
-prev_time = time.time()
+prev_time=time.time()
+
 
 # =========================
 # HAND SEGMENT
@@ -374,28 +376,28 @@ prev_time = time.time()
 
 def segment_hand(frame):
 
-    _, thresh = cv2.threshold(
+    _,thresh=cv2.threshold(
         frame,
         0,
         255,
         cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU
     )
 
-    kernel = np.ones((5,5),np.uint8)
+    kernel=np.ones((5,5),np.uint8)
 
-    thresh = cv2.morphologyEx(
+    thresh=cv2.morphologyEx(
         thresh,
         cv2.MORPH_OPEN,
         kernel
     )
 
-    thresh = cv2.morphologyEx(
+    thresh=cv2.morphologyEx(
         thresh,
         cv2.MORPH_CLOSE,
         kernel
     )
 
-    contours,_ = cv2.findContours(
+    contours,_=cv2.findContours(
         thresh.copy(),
         cv2.RETR_EXTERNAL,
         cv2.CHAIN_APPROX_SIMPLE
@@ -409,7 +411,6 @@ def segment_hand(frame):
         key=cv2.contourArea
     )
 
-    # ignore small noise
     if cv2.contourArea(hand)<5000:
         return None
 
@@ -425,6 +426,7 @@ cam=cv2.VideoCapture(0)
 cam.set(3,1280)
 cam.set(4,720)
 
+
 while True:
 
     ret,frame=cam.read()
@@ -436,6 +438,7 @@ while True:
 
     frame_copy=frame.copy()
 
+
     # FPS
 
     current=time.time()
@@ -446,10 +449,12 @@ while True:
 
     prev_time=current
 
+
     roi=frame[
         ROI_top:ROI_bottom,
         ROI_right:ROI_left
     ]
+
 
     gray=cv2.cvtColor(
         roi,
@@ -462,18 +467,16 @@ while True:
         0
     )
 
-    hand=segment_hand(gray)
 
-    # ======================
-    # DEFAULT VALUES
-    # ======================
+    hand=segment_hand(gray)
 
     current_prediction="0"
     confidence=0.0
 
-    # ======================
+
+    # =========================
     # HAND FOUND
-    # ======================
+    # =========================
 
     if hand is not None:
 
@@ -544,6 +547,7 @@ while True:
         -1
     )
 
+
     cv2.putText(
         frame_copy,
         f"Current: {current_prediction}",
@@ -553,6 +557,7 @@ while True:
         (0,0,255),
         2
     )
+
 
     cv2.putText(
         frame_copy,
@@ -564,6 +569,7 @@ while True:
         2
     )
 
+
     cv2.putText(
         frame_copy,
         f"FPS: {fps}",
@@ -574,7 +580,8 @@ while True:
         2
     )
 
-    # ROI Box
+
+    # ROI box
 
     cv2.rectangle(
         frame_copy,
@@ -597,6 +604,7 @@ while True:
         -1
     )
 
+
     cv2.putText(
         frame_copy,
         "TEXT:",
@@ -606,6 +614,7 @@ while True:
         (0,255,0),
         2
     )
+
 
     cv2.putText(
         frame_copy,
@@ -617,6 +626,7 @@ while True:
         2
     )
 
+
     # Hindi text
 
     pil=Image.fromarray(frame_copy)
@@ -627,6 +637,7 @@ while True:
         "C:/Windows/Fonts/mangal.ttf",
         28
     )
+
 
     draw.text(
         (20,600),
@@ -649,12 +660,15 @@ while True:
         frame_copy
     )
 
+
     # =========================
     # KEYBOARD
     # =========================
 
     key=cv2.waitKeyEx(20)
 
+
+    # Space key pressed
     if key==32:
 
         if current_prediction=="CLEAR":
@@ -662,16 +676,26 @@ while True:
             sentence=""
             hindi_text=""
 
+        elif current_prediction=="DELETE":
+
+            sentence=sentence[:-1]
+
+        elif current_prediction=="SPACE":
+
+            sentence+=" "
+
         elif current_prediction!="0":
 
             sentence+=current_prediction
 
 
+    # keyboard backspace
     elif key==8:
 
         sentence=sentence[:-1]
 
 
+    # ENTER translate
     elif key==13:
 
         try:
@@ -688,10 +712,10 @@ while True:
             hindi_text="Translation Error"
 
 
+    # ESC exit
     elif key==27:
 
         break
-
 
 cam.release()
 cv2.destroyAllWindows()
